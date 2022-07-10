@@ -1,42 +1,71 @@
-getgenv().userName = 0;
 getgenv().showMOT = true;
-getgenv().startMoney = 0;
-getgenv().totalMoney = 0;
-getgenv().allPlayers = {};
 
 local MONEY_FORMAT = 0
 local TIME_FORMAT = 1
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 
-
 -- Create GUI
-local Window = Library.CreateLib("$$$$", "DarkTheme");
+local Window = Library.CreateLib("$$$$", "Serpent");
 -- local playerSelectTab = Window:NewTab("Player Select");
-local MainTab = Window:NewTab("$$/h");
+local MainTab = Window:NewTab(game.Players.LocalPlayer.Name);
 
-local playerSelectSection = MainTab:NewSection("Players");
-local statsSection = MainTab:NewSection("Stats");
+local statsSection = MainTab:NewSection("current money stats:");
 
-local playerDropdown = playerSelectSection:NewDropdown(
-  "Player",
-  "Select Player",
-  {},
-  function(selected)
-    print(string.format("user selected: %s", selected))
-    getgenv().userName = selected;
-    getgenv().startTime = os.clock();
-    getgenv().startMoney = game.Players[selected].leaderstats.Cash.Value;
+local totalMoneyLabel = statsSection:NewLabel("0");
+local moneyPerHourLabel = statsSection:NewLabel("hello");
+local moneyPerSecondLabel = statsSection:NewLabel("0");
+local playTimeLabel = statsSection:NewLabel("0");
+local sinceLaunchMoneyLabel = statsSection:NewLabel("0");
+local goButton = statsSection:NewButton("pause", "start/stop", function()
+  if getgenv().showMOT == true then
+    getgenv().showMOT = false
+  else
+    getgenv().showMOT = true
   end
-);
+  print("toggle: " .. tostring(getgenv().showMOT));
+end)
 
-local totalMoneyLabel = statsSection:NewLabel("Total Money");
-local moneyPerHourLabel = statsSection:NewLabel("$/h");
-local moneyPerSecondLabel = statsSection:NewLabel("$/s");
-local playTimeLabel = statsSection:NewLabel("Play Time");
+Player = {};
+Player.__index = Player;
+function Player:Create(name, starttime, startmoney)
+  local this = {
+    name = name,
+    startTime = starttime,
+    startMoney = startmoney,
+    totalMoney = 0
+  }
+  setmetatable(this, Player);
+  self.__index = self;
+  return this;
+end
 
--- formatNum(Number)
---   format a number for human readable output
+function Player:TotalMoney()
+  self.totalMoney = game.Players[self.name].leaderstats.Cash.Value;
+  return self.totalMoney;
+end
+
+function Player:MoneySinceLaunch()
+  return self.totalMoney - self.startMoney;
+end
+
+function Player:LapTime()
+  return os.clock() - self.startTime;
+end
+
+function Player:MoneyPerHour()
+  local g = self:TotalMoney() - self.startMoney;
+  local t = os.clock() - self.startTime;
+  local multi = 3600 / t;
+  return g * multi;
+end
+
+function Player:MoneyPerSecond()
+  local g = self:TotalMoney() - self.startMoney;
+  local t = os.clock() - self.startTime;
+  return g / t;
+end
+
 function FormatNum(n, t)
   if t == MONEY_FORMAT then
     if n >= 10 ^ 9 then
@@ -61,62 +90,41 @@ function FormatNum(n, t)
   end
 end
 
--- GameGetPlayers
---  returns a list of all current players
-function GameGetPlayers()
-  local players = {}
-  for i, v in pairs(game.Players:GetChildren()) do
-    table.insert(players, v.Name);
-  end
-  return players;
-end
+print("starting money stats");
 
-print("starting: ", getgenv().showMOT);
+getgenv().stats = Player:Create(
+  game.Players.LocalPlayer.Name,
+  os.clock(),
+  game.Players[game.Players.LocalPlayer.Name].leaderstats.Cash.Value
+);
 
 spawn(function()
-  while getgenv().showMOT do
-
-    -- wait half a second
+  while true do
     wait(0.5);
 
-    -- get list of players
-    playerDropdown:Refresh(GameGetPlayers());
+    if getgenv().showMOT then
 
-    -- no user selected, leave
-    if getgenv().userName == 0 then
-      print("user not selected");
-    else
-      -- get current amount of money
-      getgenv().totalMoney = game.Players[getgenv().userName].leaderstats.Cash.Value;
+      local stats = getgenv().stats;
 
-      -- how much money we've earned since start
-      local growth = getgenv().totalMoney - getgenv().startMoney;
+      -- time played
+      local timePlayed = FormatNum(stats:LapTime(), TIME_FORMAT)
+      playTimeLabel:UpdateLabel(timePlayed);
 
-      -- how much time has passed
-      local tickTime = os.clock() - getgenv().startTime;
+      -- total money
+      local totalMoney = FormatNum(stats:TotalMoney(), MONEY_FORMAT);
+      totalMoneyLabel:UpdateLabel("total money: " .. totalMoney);
 
-      -- multiplier based on s/h
-      local hourMulti = 3600 / tickTime;
-      local secMulti = growth / tickTime;
+      -- money since launch
+      local moneySinceLaunch = FormatNum(stats:MoneySinceLaunch(), MONEY_FORMAT);
+      sinceLaunchMoneyLabel:UpdateLabel("since launch you've made: " .. moneySinceLaunch);
 
-      -- total earnings * time over an hour
-      local moneyPerHour = FormatNum(growth * hourMulti, MONEY_FORMAT);
-      local moneyPerSec = FormatNum(secMulti, MONEY_FORMAT);
+      -- money per hour
+      moneyPerHourLabel:UpdateLabel("per hour: " ..
+        FormatNum(stats:MoneyPerHour(), MONEY_FORMAT));
 
-      moneyPerHourLabel:UpdateLabel(string.format("$/h: %s", moneyPerHour));
-      totalMoneyLabel:UpdateLabel(
-        string.format(
-          "total: %s", FormatNum(getgenv().totalMoney, MONEY_FORMAT)
-        )
-      );
-
-      moneyPerSecondLabel:UpdateLabel(string.format("$/s: %s", moneyPerSec));
-
-      playTimeLabel:UpdateLabel(
-        string.format(
-          "time: %s", FormatNum(tickTime, TIME_FORMAT)
-        )
-      );
+      -- money per second
+      moneyPerSecondLabel:UpdateLabel("per second: " ..
+        FormatNum(stats:MoneyPerSecond(), MONEY_FORMAT));
     end
   end
 end)
