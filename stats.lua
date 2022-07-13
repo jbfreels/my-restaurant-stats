@@ -7,9 +7,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHept
 
 -- Create GUI
 local Window = Library.CreateLib("$$$$", "Serpent");
--- local playerSelectTab = Window:NewTab("Player Select");
 local MainTab = Window:NewTab(game.Players.LocalPlayer.Name);
-
 local statsSection = MainTab:NewSection("current money stats:");
 
 local totalMoneyLabel = statsSection:NewLabel("0");
@@ -100,31 +98,22 @@ getgenv().stats = Player:Create(
 
 spawn(function()
   while true do
-    wait(0.5);
-
     if getgenv().showMOT then
 
       local stats = getgenv().stats;
 
-      -- time played
-      local timePlayed = FormatNum(stats:LapTime(), TIME_FORMAT)
-      playTimeLabel:UpdateLabel(timePlayed);
+      playTimeLabel:UpdateLabel(FormatNum(stats:LapTime(), TIME_FORMAT));
 
-      -- total money
-      local totalMoney = FormatNum(stats:TotalMoney(), MONEY_FORMAT);
-      totalMoneyLabel:UpdateLabel("total money: " .. totalMoney);
+      totalMoneyLabel:UpdateLabel("total money: " .. FormatNum(stats:TotalMoney(), MONEY_FORMAT));
 
-      -- money since launch
-      local moneySinceLaunch = FormatNum(stats:MoneySinceLaunch(), MONEY_FORMAT);
-      sinceLaunchMoneyLabel:UpdateLabel("since launch you've made: " .. moneySinceLaunch);
+      sinceLaunchMoneyLabel:UpdateLabel("since launch you've made: " .. FormatNum(stats:MoneySinceLaunch(), MONEY_FORMAT));
 
-      -- money per hour
       moneyPerHourLabel:UpdateLabel("per hour: " ..
         FormatNum(stats:MoneyPerHour(), MONEY_FORMAT));
 
-      -- money per second
       moneyPerSecondLabel:UpdateLabel("per second: " ..
         FormatNum(stats:MoneyPerSecond(), MONEY_FORMAT));
     end
+    wait()
   end
 end)

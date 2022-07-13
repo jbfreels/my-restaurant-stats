@@ -7,5 +7,11 @@ Shows:
 * money per second
 * total money earned since launch
 
+TODO:
+* Lap function
+
+
 # Credits
 UI: https://github.com/xHeptc/Kavo-UI-Library
+
+[wYn](https://www.youtube.com/channel/UCnPtFq0xgbCLLuW0Mc383fA)🐐
