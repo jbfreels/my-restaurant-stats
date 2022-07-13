@@ -14,4 +14,4 @@ TODO:
 # Credits
 UI: https://github.com/xHeptc/Kavo-UI-Library
 
-[wYn](https://www.youtube.com/channel/UCnPtFq0xgbCLLuW0Mc383fA)🐐
+[wYn#0001](https://www.youtube.com/channel/UCnPtFq0xgbCLLuW0Mc383fA)🐐
