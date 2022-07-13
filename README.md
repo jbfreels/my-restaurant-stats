@@ -8,10 +8,12 @@ Shows:
 * total money earned since launch
 
 TODO:
-* Lap function
+* lap function
 
 
 # Credits
 UI: https://github.com/xHeptc/Kavo-UI-Library
 
 [wYn#0001](https://www.youtube.com/channel/UCnPtFq0xgbCLLuW0Mc383fA)🐐
+
+FulltimeHousewife
